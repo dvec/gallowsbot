@@ -86,11 +86,14 @@ ____
 
     def on_message_while_playing(self, event):
         text = event.text.lower()
+        need_to_exit = False
         if text == 'подсказка':
             if self.hints_left <= 0:
                 return 'Подсказки уже использованы!'
             else:
                 self._get_hint()
+        elif text == 'выход':
+            need_to_exit = True
         else:
             if len(text) != 1:
                 return 'Вы должны прислать только одну букву'
@@ -101,15 +104,15 @@ ____
 
         if all(self.right_answers):
             Vk.stop_mapping(event.user_id)
-            return 'Вы выиграли!'
-        elif len(self.mistakes) == len(self._MAN):
+            return 'Ты выиграл!'
+        elif len(self.mistakes) == len(self._MAN) or need_to_exit:
             Vk.stop_mapping(event.user_id)
-            return 'Вы проиграли! Я загадал слово {}'.format(self.word)
+            return 'Ты проиграл :( Я загадал слово {}'.format(self.word)
         else:
-            return 'У вас {}\n{}\nОшибки: {}\n{}' \
+            return 'У тебя {}\n{}\nОшибки: {}\n{}' \
                 .format(
                     'осталось {} {}\n'.format(self.hints_left, units(self.hints_left,
-                                                                 ['подсказка', 'подсказки', 'подсказок']))
+                                                                     ['подсказка', 'подсказки', 'подсказок']))
                     if self.hints_left else 'не осталось подсказок',
 
                     self._MAN[len(self.mistakes)],
@@ -122,9 +125,10 @@ def on_message_while_not_playing(event):
         game = Game()
         Vk.start_mapping(game.on_message_while_playing, event.user_id)
 
-        return 'Игра началась! В слове {} букв'.format(len(game.word))
+        return 'Игра началась! В слове {} {}'.format(len(game.word), units(len(game.word),
+                                                                           ['буква', 'буквы', 'букв']))
     else:
         is_user_subscribed = Vk.api.groups.is_member(group_id=GROUP_ID, user_id=event.user_id)
-        return 'Напишите "игра" чтобы начать игру.\n{}' \
-            .format('Спасибо что подписались на нас!' if is_user_subscribed else
-                    'Пожалуйста, подпищитесь на наше сообщество. Вам не сложно, а нам приятно')
+        return 'Напиши "игра" чтобы начать игру.\n{}' \
+            .format('Спасибо что подписался на нас!' if is_user_subscribed else
+                    'Пожалуйста, подпишись на наше сообщество. Тебе не сложно, а нам приятно')
