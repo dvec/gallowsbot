@@ -96,7 +96,7 @@ ____
             need_to_exit = True
         else:
             if len(text) != 1:
-                return 'Вы должны прислать только одну букву'
+                return 'Ты должен прислать только одну букву'
             elif text in self.characters_been:
                 return 'Эта буква уже была'
 
